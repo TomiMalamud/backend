@@ -65,8 +65,9 @@ public class TestDriveService {
     }
 
     private boolean isVehicleInUse(Long vehicleId) {
-        return testDriveRepository.findByVehiculo_IdAndFechaHoraFinIsNull(vehicleId).isPresent();
+        return !testDriveRepository.findByVehiculo_IdAndFechaHoraFinIsNull(vehicleId).isEmpty();
     }
+
 
     @Transactional(readOnly = true)
     public List<TestDriveResponseDTO> getActiveTestDrives() {
