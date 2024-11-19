@@ -4,7 +4,9 @@ import com.example.common.dtos.DealershipConfigDTO;
 import com.example.common.dtos.VehiclePositionDTO;
 import com.example.common.entities.Position;
 import com.example.common.entities.Vehicle;
+import com.example.common.entities.TestDrive;
 import com.example.vehicle_position_service.repositories.PositionRepository;
+import com.example.vehicle_position_service.repositories.TestDriveRepository;
 import com.example.vehicle_position_service.services.external.DealershipConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +23,22 @@ import java.util.List;
 @Slf4j
 public class VehiclePositionService {
     private final PositionRepository positionRepository;
+    private final TestDriveRepository testDriveRepository;
     private final DealershipConfigService dealershipConfigService;
+    private final NotificationService notificationService;
 
     public void processPosition(VehiclePositionDTO positionDTO) {
-        // Save the position
+        Position position = savePosition(positionDTO);
+
+        Optional<TestDrive> activeTestDrive = testDriveRepository
+                .findByVehiculo_IdAndFechaHoraFinIsNull(positionDTO.getVehicleId());
+
+        if (activeTestDrive.isPresent()) {
+            checkPositionConstraints(positionDTO, activeTestDrive.get());
+        }
+    }
+
+    private Position savePosition(VehiclePositionDTO positionDTO) {
         Position position = new Position();
         Vehicle vehicle = new Vehicle();
         vehicle.setId(positionDTO.getVehicleId());
@@ -31,25 +46,20 @@ public class VehiclePositionService {
         position.setLatitud(positionDTO.getLatitude());
         position.setLongitud(positionDTO.getLongitude());
         position.setFechaHora(positionDTO.getTimestamp());
-        positionRepository.save(position);
-
-        // Check if position violates any constraints
-        checkPositionConstraints(positionDTO);
+        return positionRepository.save(position);
     }
 
-    private void checkPositionConstraints(VehiclePositionDTO position) {
+    private void checkPositionConstraints(VehiclePositionDTO position, TestDrive testDrive) {
         DealershipConfigDTO config = dealershipConfigService.getConfig();
 
-        // Check radius constraint
         if (isOutsideRadius(position, config)) {
-            // Notify violation
-            notifyViolation(position.getVehicleId(), "RADIUS");
+            notifyViolation(testDrive, "RADIUS", position);
+            restrictCustomer(testDrive);
         }
 
-        // Check danger zones
         if (isInDangerZone(position, config)) {
-            // Notify violation
-            notifyViolation(position.getVehicleId(), "DANGER_ZONE");
+            notifyViolation(testDrive, "DANGER_ZONE", position);
+            restrictCustomer(testDrive);
         }
     }
 
@@ -71,27 +81,39 @@ public class VehiclePositionService {
     }
 
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        // Using Euclidean distance as specified in requirements
         double latDiff = lat2 - lat1;
         double lonDiff = lon2 - lon1;
         return Math.sqrt(latDiff * latDiff + lonDiff * lonDiff);
     }
 
-    private void notifyViolation(Long vehicleId, String violationType) {
-        // This would integrate with the notification service
-        // For now, just log the violation
-        log.warn("Vehicle {} has violated {} constraint", vehicleId, violationType);
+    private void notifyViolation(TestDrive testDrive, String violationType, VehiclePositionDTO position) {
+        String location = String.format("(%.6f, %.6f)", position.getLatitude(), position.getLongitude());
+        notificationService.sendViolationAlert(
+                testDrive.getEmpleado().getLegajo(),
+                testDrive.getId(),
+                violationType + " at " + location
+        );
+    }
+
+    private void restrictCustomer(TestDrive testDrive) {
+        testDrive.getInteresado().setRestringido(true);
+        // Note: You'll need to save this through a repository
     }
 
     public VehiclePositionDTO getLastPosition(Long vehicleId) {
-        Position position = positionRepository.findTopByVehicleIdOrderByFechaHoraDesc(vehicleId)
+        Position position = positionRepository.findFirstByVehiculo_IdOrderByFechaHoraDesc(vehicleId)
                 .orElseThrow(() -> new RuntimeException("No positions found for vehicle"));
 
         return convertToDTO(position);
     }
 
+
     public List<VehiclePositionDTO> getPositionTrack(Long vehicleId, LocalDateTime start, LocalDateTime end) {
-        return positionRepository.findByVehicleIdAndFechaHoraBetweenOrderByFechaHora(vehicleId, start, end)
+        return positionRepository.findByVehiculo_IdAndFechaHoraBetweenOrderByFechaHoraAsc(
+                        vehicleId,
+                        start,
+                        end
+                )
                 .stream()
                 .map(this::convertToDTO)
                 .toList();

@@ -3,41 +3,45 @@ package com.example.test_drive_service.services;
 import com.example.common.dtos.TestDriveRequestDTO;
 import com.example.common.dtos.TestDriveResponseDTO;
 import com.example.common.dtos.TestDriveEndRequestDTO;
-import com.example.common.entities.Interested;
-import com.example.common.entities.TestDrive;
+import com.example.common.entities.*;
 import com.example.test_drive_service.exceptions.BusinessException;
 import com.example.test_drive_service.exceptions.ResourceNotFoundException;
 import com.example.test_drive_service.repositories.TestDriveRepository;
 import com.example.test_drive_service.repositories.InterestedRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TestDriveService {
     private final TestDriveRepository testDriveRepository;
     private final InterestedRepository interestedRepository;
     private final NotificationService notificationService;
 
-    public TestDriveService(TestDriveRepository testDriveRepository,
-                            InterestedRepository interestedRepository,
-                            NotificationService notificationService) {
-        this.testDriveRepository = testDriveRepository;
-        this.interestedRepository = interestedRepository;
-        this.notificationService = notificationService;
-    }
-
     public TestDriveResponseDTO createTestDrive(TestDriveRequestDTO request) {
         validateTestDriveRequest(request);
 
         TestDrive testDrive = new TestDrive();
-        testDrive.setVehicleId(request.getVehicleId());
-        testDrive.setInterestedId(request.getInterestedId());
-        testDrive.setEmployeeId(request.getEmployeeId());
+
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(request.getVehicleId());
+        testDrive.setVehiculo(vehicle);
+
+        Interested interested = new Interested();
+        interested.setId(request.getInterestedId());
+        testDrive.setInteresado(interested);
+
+        Employee employee = new Employee();
+        employee.setLegajo(request.getEmployeeId());
+        testDrive.setEmpleado(employee);
+
         testDrive.setFechaHoraInicio(LocalDateTime.now());
 
         return convertToDTO(testDriveRepository.save(testDrive));
@@ -47,17 +51,21 @@ public class TestDriveService {
         Interested interested = interestedRepository.findById(request.getInterestedId())
                 .orElseThrow(() -> new ResourceNotFoundException("Interested party not found"));
 
-        if (interested.isRestringido()) {
+        if (interested.getRestringido()) {
             throw new BusinessException("Customer is restricted from test drives");
         }
 
-        if (interested.getFechaVencimientoLicencia().isBefore(LocalDateTime.now())) {
+        if (interested.getFechaVencimientoLicencia().isBefore(LocalDate.now())) {  // Changed to LocalDate
             throw new BusinessException("Driver's license is expired");
         }
 
-        if (testDriveRepository.existsByVehicleIdAndFechaHoraFinIsNull(request.getVehicleId())) {
+        if (isVehicleInUse(request.getVehicleId())) {
             throw new BusinessException("Vehicle is currently in use");
         }
+    }
+
+    private boolean isVehicleInUse(Long vehicleId) {
+        return testDriveRepository.findByVehiculo_IdAndFechaHoraFinIsNull(vehicleId).isPresent();
     }
 
     @Transactional(readOnly = true)
@@ -85,9 +93,9 @@ public class TestDriveService {
     private TestDriveResponseDTO convertToDTO(TestDrive testDrive) {
         return TestDriveResponseDTO.builder()
                 .id(testDrive.getId())
-                .vehicleId(testDrive.getVehicleId())
-                .interestedId(testDrive.getInterestedId())
-                .employeeId(testDrive.getEmployeeId())
+                .vehicleId(testDrive.getVehiculo().getId())
+                .interestedId(testDrive.getInteresado().getId())
+                .employeeId(testDrive.getEmpleado().getLegajo())
                 .startTime(testDrive.getFechaHoraInicio())
                 .endTime(testDrive.getFechaHoraFin())
                 .comments(testDrive.getComentarios())

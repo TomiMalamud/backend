@@ -5,37 +5,34 @@ import com.example.common.dtos.NotificationResponseDTO;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 @Service
 @Slf4j
 public class NotificationService {
 
     public NotificationResponseDTO sendNotification(NotificationRequestDTO request) {
-        // Log the notification
-        log.info("Sending notification to employee {}: {}",
-                request.getEmployeeId(),
-                request.getMessage());
+        log.info("Sending notification: {}", request.getMessage());
 
-        // Build response
         return NotificationResponseDTO.builder()
-                .id(1L)  // In a real app, this would be from database
+                .id(1L)
                 .message(request.getMessage())
+                .type(request.getType())
                 .timestamp(LocalDateTime.now())
-                .status("SENT")
+                .sent(true)
                 .build();
     }
 
     public NotificationResponseDTO sendPromotionalNotification(NotificationRequestDTO request) {
-        // Log promotional notification
         request.getPhoneNumbers().forEach(phone ->
                 log.info("Sending promotional message to {}: {}", phone, request.getMessage()));
 
-        // Build response
         return NotificationResponseDTO.builder()
-                .id(1L)  // In a real app, this would be from database
+                .id(1L)
                 .message(request.getMessage())
+                .type("PROMO")
                 .timestamp(LocalDateTime.now())
-                .status("SENT")
+                .sent(true)
                 .build();
     }
 
@@ -46,8 +43,9 @@ public class NotificationService {
                 violationType);
 
         NotificationRequestDTO request = new NotificationRequestDTO();
-        request.setEmployeeId(employeeId);
         request.setMessage(message);
+        request.setType("VIOLATION");
+        request.setPhoneNumbers(Collections.emptyList());
 
         return sendNotification(request);
     }

@@ -9,8 +9,8 @@ import lombok.Data;
 @Data
 public class Employee {
     @Id
-    @Column(name = "legado")
-    private Long legado;
+    @Column(name = "legajo")
+    private Long legajo;
 
     private String nombre;
     private String apellido;
