@@ -8,7 +8,7 @@ import com.example.test_drive_service.application.ResponseHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,35 +18,42 @@ public class TestDriveController {
     private final TestDriveService testDriveService;
 
     @PostMapping
-    public ResponseEntity<?> createTestDrive(@RequestBody TestDriveRequestDTO request) {
-        try {
+    public ResponseEntity<?> createTestDrive(@Valid @RequestBody TestDriveRequestDTO request) {
+        return handleRequest(() -> {
             TestDriveResponseDTO response = testDriveService.createTestDrive(request);
             return ResponseHandler.success(response);
-        } catch (Exception e) {
-            return ResponseHandler.error(e);
-        }
+        });
     }
 
     @GetMapping("/active")
     public ResponseEntity<?> getActiveTestDrives() {
-        try {
+        return handleRequest(() -> {
             List<TestDriveResponseDTO> activeTestDrives = testDriveService.getActiveTestDrives();
             return ResponseHandler.success(activeTestDrives);
+        });
+    }
+
+    @PutMapping("/{id}/end")
+    public ResponseEntity<?> endTestDrive(@PathVariable Long id, @Valid @RequestBody TestDriveEndRequestDTO request) {
+        return handleRequest(() -> {
+            request.setTestDriveId(id);
+            TestDriveResponseDTO response = testDriveService.endTestDrive(request);
+            return ResponseHandler.success(response);
+        });
+    }
+
+    // Utility method to centralize exception handling
+    private ResponseEntity<?> handleRequest(RequestHandler handler) {
+        try {
+            return handler.handle();
         } catch (Exception e) {
             return ResponseHandler.error(e);
         }
     }
 
-    @PutMapping("/{id}/end")
-    public ResponseEntity<?> endTestDrive(
-            @PathVariable Long id,
-            @RequestBody TestDriveEndRequestDTO request) {
-        try {
-            request.setTestDriveId(id);
-            TestDriveResponseDTO response = testDriveService.endTestDrive(request);
-            return ResponseHandler.success(response);
-        } catch (Exception e) {
-            return ResponseHandler.error(e);
-        }
+    @FunctionalInterface
+    private interface RequestHandler {
+        ResponseEntity<?> handle() throws Exception;
     }
 }
+

@@ -16,22 +16,18 @@ public class NotificationController {
 
     @PostMapping("/employee")
     public ResponseEntity<?> sendNotification(@RequestBody NotificationRequestDTO request) {
-        try {
+        return handleRequest(() -> {
             NotificationResponseDTO response = notificationService.sendNotification(request);
             return ResponseHandler.success(response);
-        } catch (Exception e) {
-            return ResponseHandler.error(e);
-        }
+        });
     }
 
     @PostMapping("/promo")
     public ResponseEntity<?> sendPromotionalNotification(@RequestBody NotificationRequestDTO request) {
-        try {
+        return handleRequest(() -> {
             NotificationResponseDTO response = notificationService.sendPromotionalNotification(request);
             return ResponseHandler.success(response);
-        } catch (Exception e) {
-            return ResponseHandler.error(e);
-        }
+        });
     }
 
     @PostMapping("/violation")
@@ -39,12 +35,24 @@ public class NotificationController {
             @RequestParam Long employeeId,
             @RequestParam Long testDriveId,
             @RequestParam String violationType) {
-        try {
+        return handleRequest(() -> {
             NotificationResponseDTO response =
                     notificationService.sendViolationAlert(employeeId, testDriveId, violationType);
             return ResponseHandler.success(response);
+        });
+    }
+
+    // Utility method to centralize exception handling
+    private ResponseEntity<?> handleRequest(RequestHandler handler) {
+        try {
+            return handler.handle();
         } catch (Exception e) {
             return ResponseHandler.error(e);
         }
+    }
+
+    @FunctionalInterface
+    private interface RequestHandler {
+        ResponseEntity<?> handle() throws Exception;
     }
 }

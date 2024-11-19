@@ -32,4 +32,18 @@ public class TestDrive {
     @ManyToOne
     @JoinColumn(name = "id_empleado")
     private Employee empleado;
+
+    @Column(name = "has_violations")
+    private boolean hasViolations;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "violation_type")
+    private ViolationType violationType;
+
+    public enum ViolationType {
+        NONE,
+        RADIUS_EXCEEDED,
+        DANGER_ZONE,
+        BOTH
+    }
 }

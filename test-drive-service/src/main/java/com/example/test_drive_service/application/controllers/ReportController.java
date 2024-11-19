@@ -17,20 +17,12 @@ public class ReportController {
 
     @GetMapping("/incidents")
     public ResponseEntity<?> getAllIncidents() {
-        try {
-            return ResponseHandler.success(reportService.getIncidents());
-        } catch (Exception e) {
-            return ResponseHandler.error(e);
-        }
+        return handleRequest(() -> ResponseHandler.success(reportService.getIncidents()));
     }
 
     @GetMapping("/incidents/employee/{employeeId}")
     public ResponseEntity<?> getEmployeeIncidents(@PathVariable Long employeeId) {
-        try {
-            return ResponseHandler.success(reportService.getEmployeeIncidents(employeeId));
-        } catch (Exception e) {
-            return ResponseHandler.error(e);
-        }
+        return handleRequest(() -> ResponseHandler.success(reportService.getEmployeeIncidents(employeeId)));
     }
 
     @GetMapping("/vehicle/{vehicleId}/mileage")
@@ -38,21 +30,25 @@ public class ReportController {
             @PathVariable Long vehicleId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        return handleRequest(() -> ResponseHandler.success(reportService.getVehicleMileage(vehicleId, start, end)));
+    }
+
+    @GetMapping("/vehicle/{vehicleId}")
+    public ResponseEntity<?> getVehicleTestDriveDetails(@PathVariable Long vehicleId) {
+        return handleRequest(() -> ResponseHandler.success(reportService.getVehicleTestDriveDetails(vehicleId)));
+    }
+
+    // Utility method to centralize exception handling
+    private ResponseEntity<?> handleRequest(RequestHandler handler) {
         try {
-            return ResponseHandler.success(
-                    reportService.getVehicleMileage(vehicleId, start, end));
+            return handler.handle();
         } catch (Exception e) {
             return ResponseHandler.error(e);
         }
     }
 
-    @GetMapping("/vehicle/{vehicleId}")
-    public ResponseEntity<?> getVehicleTestDriveDetails(@PathVariable Long vehicleId) {
-        try {
-            return ResponseHandler.success(
-                    reportService.getVehicleTestDriveDetails(vehicleId));
-        } catch (Exception e) {
-            return ResponseHandler.error(e);
-        }
+    @FunctionalInterface
+    private interface RequestHandler {
+        ResponseEntity<?> handle() throws Exception;
     }
 }
