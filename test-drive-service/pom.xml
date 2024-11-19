@@ -31,12 +31,19 @@
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
-		<!-- Include Spring Boot Starter Web if it's a web application -->
+		<!-- Spring Boot Starter Web for web functionality -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- Add Spring Boot Starter Data JPA for repositories -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

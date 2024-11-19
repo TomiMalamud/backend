@@ -27,7 +27,7 @@ public class TestDrive {
 
     @ManyToOne
     @JoinColumn(name = "id_interesado")
-    private InterestedParty interesado;
+    private Interested interesado;
 
     @ManyToOne
     @JoinColumn(name = "id_empleado")
