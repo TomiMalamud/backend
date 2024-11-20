@@ -21,21 +21,23 @@ public class ReportService {
     private final TestDriveRepository testDriveRepository;
     private final PositionRepository positionRepository;
 
-    public List<IncidentReportDTO> getIncidents() {
-        List<TestDrive> testDrives = testDriveRepository.findByHasViolationsTrue();
+    // Replace violation-based methods with general test drive reports
+    public List<TestDriveReportDTO> getAllTestDrives() {
+        List<TestDrive> testDrives = testDriveRepository.findAll();
         return testDrives.stream()
-                .map(this::convertToIncidentDTO)
+                .map(this::convertToReportDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<IncidentReportDTO> getEmployeeIncidents(Long employeeId) {
-        List<TestDrive> testDrives = testDriveRepository.findByEmpleado_LegajoAndHasViolationsTrue(employeeId);
+    public List<TestDriveReportDTO> getEmployeeTestDrives(Long employeeId) {
+        List<TestDrive> testDrives = testDriveRepository.findByEmpleado_Legajo(employeeId);
         return testDrives.stream()
-                .map(this::convertToIncidentDTO)
+                .map(this::convertToReportDTO)
                 .collect(Collectors.toList());
     }
 
     public double getVehicleMileage(Long vehicleId, LocalDateTime start, LocalDateTime end) {
+        // Keep this method as is
         List<Position> positions = positionRepository.findByVehiculo_IdAndFechaHoraBetween(
                 vehicleId, start, end);
 
@@ -67,15 +69,6 @@ public class ReportService {
                 .startTime(testDrive.getFechaHoraInicio())
                 .endTime(testDrive.getFechaHoraFin())
                 .comments(testDrive.getComentarios())
-                .build();
-    }
-
-    private IncidentReportDTO convertToIncidentDTO(TestDrive testDrive) {
-        return IncidentReportDTO.builder()
-                .testDriveId(testDrive.getId())
-                .employeeName(testDrive.getEmpleado().getNombre() + " " + testDrive.getEmpleado().getApellido())
-                .customerName(testDrive.getInteresado().getNombre() + " " + testDrive.getInteresado().getApellido())
-                .vehiclePlate(testDrive.getVehiculo().getPatente())
                 .build();
     }
 

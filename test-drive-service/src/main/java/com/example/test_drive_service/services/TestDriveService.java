@@ -1,5 +1,5 @@
 package com.example.test_drive_service.services;
-
+import java.time.format.DateTimeFormatter;  // Add this import
 import com.example.common.dtos.TestDriveRequestDTO;
 import com.example.common.dtos.TestDriveResponseDTO;
 import com.example.common.dtos.TestDriveEndRequestDTO;
@@ -11,12 +11,9 @@ import com.example.test_drive_service.repositories.InterestedRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.example.common.dtos.IncidentReportDTO;
-import com.example.common.dtos.TestDriveReportDTO;
 
 @Service
 @Transactional
@@ -43,6 +40,8 @@ public class TestDriveService {
         employee.setLegajo(request.getEmployeeId());
         testDrive.setEmpleado(employee);
 
+        // Format current date as string
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         testDrive.setFechaHoraInicio(LocalDateTime.now());
 
         return convertToDTO(testDriveRepository.save(testDrive));
@@ -56,7 +55,8 @@ public class TestDriveService {
             throw new BusinessException("Customer is restricted from test drives");
         }
 
-        if (interested.getFechaVencimientoLicencia().isBefore(LocalDate.now())) {  // Changed to LocalDate
+        // Convert LocalDateTime to LocalDate for comparison
+        if (interested.getFechaVencimientoLicencia().isBefore(LocalDateTime.now().toLocalDate())) {
             throw new BusinessException("Driver's license is expired");
         }
 
@@ -68,7 +68,6 @@ public class TestDriveService {
     private boolean isVehicleInUse(Long vehicleId) {
         return !testDriveRepository.findByVehiculo_IdAndFechaHoraFinIsNull(vehicleId).isEmpty();
     }
-
 
     @Transactional(readOnly = true)
     public List<TestDriveResponseDTO> getActiveTestDrives() {
@@ -101,59 +100,6 @@ public class TestDriveService {
                 .startTime(testDrive.getFechaHoraInicio())
                 .endTime(testDrive.getFechaHoraFin())
                 .comments(testDrive.getComentarios())
-                .build();
-    }
-    public List<IncidentReportDTO> getIncidentReport() {
-        return testDriveRepository.findByHasViolationsTrue().stream()
-                .map(this::convertToIncidentDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<IncidentReportDTO> getEmployeeIncidents(Long employeeId) {
-        return testDriveRepository.findByEmpleado_LegajoAndHasViolationsTrue(employeeId).stream()
-                .map(this::convertToIncidentDTO)
-                .collect(Collectors.toList());
-    }
-
-    public TestDriveReportDTO getVehicleMileage(Long vehicleId, LocalDateTime startDate, LocalDateTime endDate) {
-        List<TestDrive> testDrives = testDriveRepository.findByVehiculo_Id(vehicleId);
-
-        TestDrive relevantDrive = testDrives.stream()
-                .filter(td -> td.getFechaHoraInicio().isAfter(startDate)
-                        && td.getFechaHoraInicio().isBefore(endDate))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Test drive not found for vehicle in given period"));
-
-        return convertToReportDTO(relevantDrive);
-    }
-
-    public List<TestDriveReportDTO> getVehicleTestDrives(Long vehicleId) {
-        return testDriveRepository.findByVehiculo_Id(vehicleId).stream()
-                .map(this::convertToReportDTO)
-                .collect(Collectors.toList());
-    }
-
-    private IncidentReportDTO convertToIncidentDTO(TestDrive testDrive) {
-        return IncidentReportDTO.builder()
-                .testDriveId(testDrive.getId())
-                .violationType(testDrive.getViolationType().toString())
-                .violationTime(testDrive.getFechaHoraInicio())
-                .employeeName(testDrive.getEmpleado().getNombre())
-                .customerName(testDrive.getInteresado().getNombre())
-                .vehiclePlate(testDrive.getVehiculo().getPatente())
-                .build();
-    }
-
-    private TestDriveReportDTO convertToReportDTO(TestDrive testDrive) {
-        return TestDriveReportDTO.builder()
-                .testDriveId(testDrive.getId())
-                .vehiclePlate(testDrive.getVehiculo().getPatente())
-                .customerName(testDrive.getInteresado().getNombre())
-                .employeeName(testDrive.getEmpleado().getNombre())
-                .startTime(testDrive.getFechaHoraInicio())
-                .endTime(testDrive.getFechaHoraFin())
-                .comments(testDrive.getComentarios())
-                .hadViolations(testDrive.isHasViolations())
                 .build();
     }
 }

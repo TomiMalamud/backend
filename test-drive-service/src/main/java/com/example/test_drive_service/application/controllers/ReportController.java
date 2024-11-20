@@ -15,14 +15,14 @@ import java.time.LocalDateTime;
 public class ReportController {
     private final ReportService reportService;
 
-    @GetMapping("/incidents")
-    public ResponseEntity<?> getAllIncidents() {
-        return handleRequest(() -> ResponseHandler.success(reportService.getIncidents()));
+    @GetMapping("/test-drives")
+    public ResponseEntity<?> getAllTestDrives() {
+        return handleRequest(() -> ResponseHandler.success(reportService.getAllTestDrives()));
     }
 
-    @GetMapping("/incidents/employee/{employeeId}")
-    public ResponseEntity<?> getEmployeeIncidents(@PathVariable Long employeeId) {
-        return handleRequest(() -> ResponseHandler.success(reportService.getEmployeeIncidents(employeeId)));
+    @GetMapping("/test-drives/employee/{employeeId}")
+    public ResponseEntity<?> getEmployeeTestDrives(@PathVariable Long employeeId) {
+        return handleRequest(() -> ResponseHandler.success(reportService.getEmployeeTestDrives(employeeId)));
     }
 
     @GetMapping("/vehicle/{vehicleId}/mileage")
@@ -38,7 +38,7 @@ public class ReportController {
         return handleRequest(() -> ResponseHandler.success(reportService.getVehicleTestDriveDetails(vehicleId)));
     }
 
-    // Utility method to centralize exception handling
+    // Keep the utility methods unchanged
     private ResponseEntity<?> handleRequest(RequestHandler handler) {
         try {
             return handler.handle();

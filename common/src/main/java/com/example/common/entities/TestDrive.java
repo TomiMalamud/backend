@@ -6,44 +6,32 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "pruebas")
+@Table(name = "Pruebas")
 @Data
 public class TestDrive {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
-    @Column(name = "fecha_hora_inicio")
-    private LocalDateTime fechaHoraInicio;
-
-    @Column(name = "fecha_hora_fin")
-    private LocalDateTime fechaHoraFin;
-
-    private String comentarios;
-
     @ManyToOne
-    @JoinColumn(name = "id_vehiculo")
+    @JoinColumn(name = "ID_VEHICULO")  // Column 2: VALUE 1
     private Vehicle vehiculo;
 
     @ManyToOne
-    @JoinColumn(name = "id_interesado")
+    @JoinColumn(name = "ID_INTERESADO")  // Column 3: VALUE 1
     private Interested interesado;
 
     @ManyToOne
-    @JoinColumn(name = "id_empleado")
+    @JoinColumn(name = "ID_EMPLEADO")   // Column 4: VALUE 2
     private Employee empleado;
 
-    @Column(name = "has_violations")
-    private boolean hasViolations;
+    @Column(name = "FECHA_HORA_INICIO", columnDefinition = "TEXT")  // Column 5: 2024-11-19 23:37:10
+    private LocalDateTime fechaHoraInicio;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "violation_type")
-    private ViolationType violationType;
+    @Column(name = "FECHA_HORA_FIN", columnDefinition = "TEXT")  // Column 6: 2024-11-20 00:37:10
+    private LocalDateTime fechaHoraFin;
 
-    public enum ViolationType {
-        NONE,
-        RADIUS_EXCEEDED,
-        DANGER_ZONE,
-        BOTH
-    }
+    @Column(name = "COMENTARIOS")  // Column 7: "Comentario"
+    private String comentarios;
 }
