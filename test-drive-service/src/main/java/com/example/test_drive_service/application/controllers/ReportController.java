@@ -15,6 +15,18 @@ import java.time.LocalDateTime;
 public class ReportController {
     private final ReportService reportService;
 
+    // Add these two new endpoints
+    @GetMapping("/incidents")
+    public ResponseEntity<?> getIncidentReport() {
+        return handleRequest(() -> ResponseHandler.success(reportService.getIncidentReport()));
+    }
+
+    @GetMapping("/incidents/employee/{employeeId}")
+    public ResponseEntity<?> getEmployeeIncidents(@PathVariable Long employeeId) {
+        return handleRequest(() -> ResponseHandler.success(reportService.getEmployeeIncidents(employeeId)));
+    }
+
+    // Keep your existing endpoints
     @GetMapping("/test-drives")
     public ResponseEntity<?> getAllTestDrives() {
         return handleRequest(() -> ResponseHandler.success(reportService.getAllTestDrives()));
@@ -38,7 +50,7 @@ public class ReportController {
         return handleRequest(() -> ResponseHandler.success(reportService.getVehicleTestDriveDetails(vehicleId)));
     }
 
-    // Keep the utility methods unchanged
+    // Keep your utility methods
     private ResponseEntity<?> handleRequest(RequestHandler handler) {
         try {
             return handler.handle();

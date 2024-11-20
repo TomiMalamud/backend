@@ -46,6 +46,36 @@ public class ReportService {
                 .map(this::convertToReportDTO)
                 .collect(Collectors.toList());
     }
+    // Add to ReportService.java
+    public List<IncidentReportDTO> getIncidentReport() {
+        return testDriveRepository.findAll().stream()
+                .filter(this::isViolation)
+                .map(this::convertToIncidentDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<IncidentReportDTO> getEmployeeIncidents(Long employeeId) {
+        return testDriveRepository.findByEmployeeId(employeeId).stream()
+                .filter(this::isViolation)
+                .map(this::convertToIncidentDTO)
+                .collect(Collectors.toList());
+    }
+
+    private boolean isViolation(TestDrive testDrive) {
+        // A test drive is considered a violation if it has ended and has comments
+        // (assuming comments are added when violations occur)
+        return testDrive.getFechaHoraFin() != null &&
+                testDrive.getComentarios() != null &&
+                !testDrive.getComentarios().isEmpty();
+    }
+
+    private IncidentReportDTO convertToIncidentDTO(TestDrive testDrive) {
+        return IncidentReportDTO.builder()
+                .testDriveId(testDrive.getId())
+                .violationType("RADIUS/DANGER_ZONE")
+                .violationTime(LocalDateTime.now())
+                .build();
+    }
 
     private TestDriveReportDTO convertToReportDTO(TestDrive testDrive) {
         return TestDriveReportDTO.builder()

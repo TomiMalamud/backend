@@ -95,8 +95,7 @@ public class VehiclePositionService {
     }
 
     private void restrictCustomer(TestDrive testDrive) {
-        // Update through repository instead
-        testDriveRepository.updateInteresadoRestringido(testDrive.getInterestedId(), true);
+        testDriveRepository.updateInteresadoRestringido(testDrive.getId(), true);
     }
 
     public VehiclePositionDTO getLastPosition(Long vehicleId) {
