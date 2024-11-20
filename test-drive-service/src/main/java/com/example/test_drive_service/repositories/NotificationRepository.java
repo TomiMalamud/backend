@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findByEmployeeId(Long employeeId);
-    List<Notification> findByTimestampBetween(LocalDateTime start, LocalDateTime end);
-    List<Notification> findByType(String type);
+    List<Notification> findByEmpleadoLegajo(Long Legajo);  // Changed from findByEmployeeId
+    List<Notification> findByFechaHoraBetween(LocalDateTime start, LocalDateTime end);  // Changed from findByTimestampBetween
+    // Remove findByType as there's no 'type' field in your entity
 }
