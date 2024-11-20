@@ -13,7 +13,7 @@ public class TestDriveReportDTO {
     private Long vehicleId;
     private Long customerId;
     private Long employeeId;
-    private String startTime;
-    private String endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private String comments;
 }

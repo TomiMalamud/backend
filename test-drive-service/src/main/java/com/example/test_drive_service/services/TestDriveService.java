@@ -1,5 +1,6 @@
+// TestDriveService.java
 package com.example.test_drive_service.services;
-import java.time.format.DateTimeFormatter;  // Add this import
+
 import com.example.common.dtos.TestDriveRequestDTO;
 import com.example.common.dtos.TestDriveResponseDTO;
 import com.example.common.dtos.TestDriveEndRequestDTO;
@@ -11,6 +12,7 @@ import com.example.test_drive_service.repositories.InterestedRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,12 +33,12 @@ public class TestDriveService {
         testDrive.setInterestedId(request.getInterestedId());
         testDrive.setEmployeeId(request.getEmployeeId());
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        testDrive.setFechaHoraInicio(LocalDateTime.now().format(formatter));
+        testDrive.setFechaHoraInicio(LocalDateTime.now());
         testDrive.setFechaHoraFin(null);
 
         return convertToDTO(testDriveRepository.save(testDrive));
     }
+
     public TestDriveResponseDTO endTestDrive(TestDriveEndRequestDTO request) {
         TestDrive testDrive = testDriveRepository.findById(request.getTestDriveId())
                 .orElseThrow(() -> new ResourceNotFoundException("Test drive not found"));
@@ -45,8 +47,7 @@ public class TestDriveService {
             throw new BusinessException("Test drive is already ended");
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        testDrive.setFechaHoraFin(LocalDateTime.now().format(formatter));
+        testDrive.setFechaHoraFin(LocalDateTime.now());
         testDrive.setComentarios(request.getComments());
 
         return convertToDTO(testDriveRepository.save(testDrive));
@@ -60,7 +61,7 @@ public class TestDriveService {
             throw new BusinessException("Customer is restricted from test drives");
         }
 
-        if (interested.getFechaVencimientoLicencia().isBefore(LocalDateTime.now().toLocalDate())) {
+        if (interested.getFechaVencimientoLicencia().isBefore(LocalDate.now())) {
             throw new BusinessException("Driver's license is expired");
         }
 
@@ -73,7 +74,6 @@ public class TestDriveService {
         return !testDriveRepository.findByVehicleIdAndFechaHoraFinIsNull(vehicleId).isEmpty();
     }
 
-    // Update repository method name to match new entity
     @Transactional(readOnly = true)
     public List<TestDriveResponseDTO> getActiveTestDrives() {
         return testDriveRepository.findByFechaHoraFinIsNull()
@@ -88,11 +88,8 @@ public class TestDriveService {
                 .vehicleId(testDrive.getVehicleId())
                 .interestedId(testDrive.getInterestedId())
                 .employeeId(testDrive.getEmployeeId())
-                .startTime(LocalDateTime.parse(testDrive.getFechaHoraInicio(),
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .endTime(testDrive.getFechaHoraFin() != null ?
-                        LocalDateTime.parse(testDrive.getFechaHoraFin(),
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null)
+                .startTime(testDrive.getFechaHoraInicio())
+                .endTime(testDrive.getFechaHoraFin())
                 .comments(testDrive.getComentarios())
                 .build();
     }

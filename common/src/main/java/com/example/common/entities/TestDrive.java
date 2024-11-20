@@ -3,6 +3,7 @@ package com.example.common.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,7 +11,15 @@ import java.time.LocalDateTime;
 @Data
 public class TestDrive {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "test_drive_sequence")
+    @TableGenerator(
+            name = "test_drive_sequence",
+            table = "sqlite_sequence",
+            pkColumnName = "name",
+            valueColumnName = "seq",
+            pkColumnValue = "PRUEBAS",
+            allocationSize = 1
+    )
     @Column(name = "ID")
     private Long id;
 
@@ -24,24 +33,11 @@ public class TestDrive {
     private Long employeeId;
 
     @Column(name = "FECHA_HORA_INICIO")
-    private String fechaHoraInicio;
+    private LocalDateTime fechaHoraInicio;
 
     @Column(name = "FECHA_HORA_FIN")
-    private String fechaHoraFin;
+    private LocalDateTime fechaHoraFin;
 
     @Column(name = "COMENTARIOS")
     private String comentarios;
-
-    // Add setter methods
-    public void setVehiculo(Vehicle vehicle) {
-        this.vehicleId = vehicle.getId();
-    }
-
-    public void setInteresado(Interested interested) {
-        this.interestedId = interested.getId();
-    }
-
-    public void setEmpleado(Employee employee) {
-        this.employeeId = employee.getLegajo();
-    }
 }
