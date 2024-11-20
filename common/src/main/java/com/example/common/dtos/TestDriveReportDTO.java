@@ -7,17 +7,13 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class TestDriveReportDTO {
     private Long testDriveId;
-    private String vehiclePlate;
-    private String customerName;
-    private String employeeName;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private Double totalDistance;
+    private Long vehicleId;
+    private Long customerId;
+    private Long employeeId;
+    private String startTime;
+    private String endTime;
     private String comments;
-    private boolean hadViolations;
 }

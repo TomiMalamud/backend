@@ -8,5 +8,5 @@ public class VehiclePositionDTO {
     private Long vehicleId;
     private Double latitude;
     private Double longitude;
-    private LocalDateTime timestamp;
+    private String timestamp;  // Change type from LocalDateTime to String
 }

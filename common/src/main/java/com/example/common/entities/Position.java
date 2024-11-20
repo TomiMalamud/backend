@@ -5,21 +5,25 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+// Position.java
 @Entity
-@Table(name = "posiciones")
+@Table(name = "Posiciones")
 @Data
 public class Position {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
+    @Column(name = "ID_VEHICULO")
+    private Long idVehiculo;
+
+    @Column(name = "FECHA_HORA")
+    private String fechaHora;
+
+    @Column(name = "LATITUD")
     private Double latitud;
+
+    @Column(name = "LONGITUD")
     private Double longitud;
-
-    @Column(name = "fecha_hora")
-    private LocalDateTime fechaHora;
-
-    @ManyToOne
-    @JoinColumn(name = "id_vehiculo")
-    private Vehicle vehiculo;
 }

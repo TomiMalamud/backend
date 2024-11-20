@@ -8,14 +8,8 @@ import java.util.Optional;
 
 @Repository
 public interface TestDriveRepository extends JpaRepository<TestDrive, Long> {
+    List<TestDrive> findByVehicleIdAndFechaHoraFinIsNull(Long vehicleId);
+    List<TestDrive> findByEmployeeId(Long employeeId);
+    List<TestDrive> findByVehicleId(Long vehicleId);
     List<TestDrive> findByFechaHoraFinIsNull();
-    List<TestDrive> findByVehiculo_IdAndFechaHoraFinIsNull(Long vehicleId);
-
-    // Remove or modify these methods since hasViolations no longer exists
-    // List<TestDrive> findByHasViolationsTrue();
-    // List<TestDrive> findByEmpleado_LegajoAndHasViolationsTrue(Long employeeId);
-
-    // Replace with simple queries
-    List<TestDrive> findByEmpleado_Legajo(Long employeeId);
-    List<TestDrive> findByVehiculo_Id(Long vehicleId);
 }

@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -31,21 +31,20 @@ public class VehiclePositionService {
         Position position = savePosition(positionDTO);
 
         Optional<TestDrive> activeTestDrive = testDriveRepository
-                .findByVehiculo_IdAndFechaHoraFinIsNull(positionDTO.getVehicleId());
+                .findByVehicleIdAndFechaHoraFinIsNull(positionDTO.getVehicleId());
 
         if (activeTestDrive.isPresent()) {
             checkPositionConstraints(positionDTO, activeTestDrive.get());
         }
     }
 
+
     private Position savePosition(VehiclePositionDTO positionDTO) {
         Position position = new Position();
-        Vehicle vehicle = new Vehicle();
-        vehicle.setId(positionDTO.getVehicleId());
-        position.setVehiculo(vehicle);
+        position.setIdVehiculo(positionDTO.getVehicleId());
         position.setLatitud(positionDTO.getLatitude());
         position.setLongitud(positionDTO.getLongitude());
-        position.setFechaHora(positionDTO.getTimestamp());
+        position.setFechaHora(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return positionRepository.save(position);
     }
 
@@ -89,39 +88,38 @@ public class VehiclePositionService {
     private void notifyViolation(TestDrive testDrive, String violationType, VehiclePositionDTO position) {
         String location = String.format("(%.6f, %.6f)", position.getLatitude(), position.getLongitude());
         notificationService.sendViolationAlert(
-                testDrive.getEmpleado().getLegajo(),
+                testDrive.getEmployeeId(),
                 testDrive.getId(),
                 violationType + " at " + location
         );
     }
 
     private void restrictCustomer(TestDrive testDrive) {
-        testDrive.getInteresado().setRestringido(true);
-        // Note: You'll need to save this through a repository
+        // Update through repository instead
+        testDriveRepository.updateInteresadoRestringido(testDrive.getInterestedId(), true);
     }
 
     public VehiclePositionDTO getLastPosition(Long vehicleId) {
-        Position position = positionRepository.findFirstByVehiculo_IdOrderByFechaHoraDesc(vehicleId)
-                .orElseThrow(() -> new RuntimeException("No positions found for vehicle"));
-
+        Position position = positionRepository.findFirstByIdVehiculoOrderByFechaHoraDesc(vehicleId)
+                .orElseThrow(() -> new RuntimeException("No positions found"));
         return convertToDTO(position);
     }
 
 
     public List<VehiclePositionDTO> getPositionTrack(Long vehicleId, LocalDateTime start, LocalDateTime end) {
-        return positionRepository.findByVehiculo_IdAndFechaHoraBetweenOrderByFechaHoraAsc(
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return positionRepository.findByIdVehiculoAndFechaHoraBetweenOrderByFechaHoraAsc(
                         vehicleId,
-                        start,
-                        end
-                )
-                .stream()
+                        start.format(formatter),
+                        end.format(formatter)
+                ).stream()
                 .map(this::convertToDTO)
                 .toList();
     }
 
     private VehiclePositionDTO convertToDTO(Position position) {
         VehiclePositionDTO dto = new VehiclePositionDTO();
-        dto.setVehicleId(position.getVehiculo().getId());
+        dto.setVehicleId(position.getIdVehiculo());
         dto.setLatitude(position.getLatitud());
         dto.setLongitude(position.getLongitud());
         dto.setTimestamp(position.getFechaHora());

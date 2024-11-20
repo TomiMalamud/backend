@@ -8,9 +8,5 @@ import java.util.List;
 
 @Repository
 public interface PositionRepository extends JpaRepository<Position, Long> {
-    List<Position> findByVehiculo_IdAndFechaHoraBetween(
-            Long vehicleId,
-            LocalDateTime start,
-            LocalDateTime end
-    );
+    List<Position> findByIdVehiculoAndFechaHoraBetween(Long idVehiculo, String start, String end);
 }

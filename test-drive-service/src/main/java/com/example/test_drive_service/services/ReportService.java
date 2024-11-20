@@ -9,7 +9,7 @@ import com.example.test_drive_service.repositories.PositionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,26 +21,45 @@ public class ReportService {
     private final TestDriveRepository testDriveRepository;
     private final PositionRepository positionRepository;
 
-    // Replace violation-based methods with general test drive reports
     public List<TestDriveReportDTO> getAllTestDrives() {
-        List<TestDrive> testDrives = testDriveRepository.findAll();
-        return testDrives.stream()
+        return testDriveRepository.findAll().stream()
                 .map(this::convertToReportDTO)
                 .collect(Collectors.toList());
     }
 
     public List<TestDriveReportDTO> getEmployeeTestDrives(Long employeeId) {
-        List<TestDrive> testDrives = testDriveRepository.findByEmpleado_Legajo(employeeId);
-        return testDrives.stream()
+        return testDriveRepository.findByEmployeeId(employeeId).stream()
                 .map(this::convertToReportDTO)
                 .collect(Collectors.toList());
     }
 
     public double getVehicleMileage(Long vehicleId, LocalDateTime start, LocalDateTime end) {
-        // Keep this method as is
-        List<Position> positions = positionRepository.findByVehiculo_IdAndFechaHoraBetween(
-                vehicleId, start, end);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        List<Position> positions = positionRepository.findByIdVehiculoAndFechaHoraBetween(
+                vehicleId, start.format(formatter), end.format(formatter));
 
+        return calculateTotalDistance(positions);
+    }
+
+    public List<TestDriveReportDTO> getVehicleTestDriveDetails(Long vehicleId) {
+        return testDriveRepository.findByVehicleId(vehicleId).stream()
+                .map(this::convertToReportDTO)
+                .collect(Collectors.toList());
+    }
+
+    private TestDriveReportDTO convertToReportDTO(TestDrive testDrive) {
+        return TestDriveReportDTO.builder()
+                .testDriveId(testDrive.getId())
+                .vehicleId(testDrive.getVehicleId())
+                .customerId(testDrive.getInterestedId())
+                .employeeId(testDrive.getEmployeeId())
+                .startTime(testDrive.getFechaHoraInicio())
+                .endTime(testDrive.getFechaHoraFin())
+                .comments(testDrive.getComentarios())
+                .build();
+    }
+
+    private double calculateTotalDistance(List<Position> positions) {
         double totalDistance = 0.0;
         for (int i = 1; i < positions.size(); i++) {
             Position prev = positions.get(i - 1);
@@ -51,25 +70,6 @@ public class ReportService {
             );
         }
         return totalDistance;
-    }
-
-    public List<TestDriveReportDTO> getVehicleTestDriveDetails(Long vehicleId) {
-        List<TestDrive> testDrives = testDriveRepository.findByVehiculo_Id(vehicleId);
-        return testDrives.stream()
-                .map(this::convertToReportDTO)
-                .collect(Collectors.toList());
-    }
-
-    private TestDriveReportDTO convertToReportDTO(TestDrive testDrive) {
-        return TestDriveReportDTO.builder()
-                .testDriveId(testDrive.getId())
-                .vehiclePlate(testDrive.getVehiculo().getPatente())
-                .customerName(testDrive.getInteresado().getNombre() + " " + testDrive.getInteresado().getApellido())
-                .employeeName(testDrive.getEmpleado().getNombre() + " " + testDrive.getEmpleado().getApellido())
-                .startTime(testDrive.getFechaHoraInicio())
-                .endTime(testDrive.getFechaHoraFin())
-                .comments(testDrive.getComentarios())
-                .build();
     }
 
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

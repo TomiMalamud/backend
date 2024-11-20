@@ -27,22 +27,27 @@ public class TestDriveService {
         validateTestDriveRequest(request);
 
         TestDrive testDrive = new TestDrive();
+        testDrive.setVehicleId(request.getVehicleId());
+        testDrive.setInterestedId(request.getInterestedId());
+        testDrive.setEmployeeId(request.getEmployeeId());
 
-        Vehicle vehicle = new Vehicle();
-        vehicle.setId(request.getVehicleId());
-        testDrive.setVehiculo(vehicle);
-
-        Interested interested = new Interested();
-        interested.setId(request.getInterestedId());
-        testDrive.setInteresado(interested);
-
-        Employee employee = new Employee();
-        employee.setLegajo(request.getEmployeeId());
-        testDrive.setEmpleado(employee);
-
-        // Format current date as string
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        testDrive.setFechaHoraInicio(LocalDateTime.now());
+        testDrive.setFechaHoraInicio(LocalDateTime.now().format(formatter));
+        testDrive.setFechaHoraFin(null);
+
+        return convertToDTO(testDriveRepository.save(testDrive));
+    }
+    public TestDriveResponseDTO endTestDrive(TestDriveEndRequestDTO request) {
+        TestDrive testDrive = testDriveRepository.findById(request.getTestDriveId())
+                .orElseThrow(() -> new ResourceNotFoundException("Test drive not found"));
+
+        if (testDrive.getFechaHoraFin() != null) {
+            throw new BusinessException("Test drive is already ended");
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        testDrive.setFechaHoraFin(LocalDateTime.now().format(formatter));
+        testDrive.setComentarios(request.getComments());
 
         return convertToDTO(testDriveRepository.save(testDrive));
     }
@@ -55,7 +60,6 @@ public class TestDriveService {
             throw new BusinessException("Customer is restricted from test drives");
         }
 
-        // Convert LocalDateTime to LocalDate for comparison
         if (interested.getFechaVencimientoLicencia().isBefore(LocalDateTime.now().toLocalDate())) {
             throw new BusinessException("Driver's license is expired");
         }
@@ -66,9 +70,10 @@ public class TestDriveService {
     }
 
     private boolean isVehicleInUse(Long vehicleId) {
-        return !testDriveRepository.findByVehiculo_IdAndFechaHoraFinIsNull(vehicleId).isEmpty();
+        return !testDriveRepository.findByVehicleIdAndFechaHoraFinIsNull(vehicleId).isEmpty();
     }
 
+    // Update repository method name to match new entity
     @Transactional(readOnly = true)
     public List<TestDriveResponseDTO> getActiveTestDrives() {
         return testDriveRepository.findByFechaHoraFinIsNull()
@@ -77,28 +82,17 @@ public class TestDriveService {
                 .collect(Collectors.toList());
     }
 
-    public TestDriveResponseDTO endTestDrive(TestDriveEndRequestDTO request) {
-        TestDrive testDrive = testDriveRepository.findById(request.getTestDriveId())
-                .orElseThrow(() -> new ResourceNotFoundException("Test drive not found"));
-
-        if (testDrive.getFechaHoraFin() != null) {
-            throw new BusinessException("Test drive is already ended");
-        }
-
-        testDrive.setFechaHoraFin(LocalDateTime.now());
-        testDrive.setComentarios(request.getComments());
-
-        return convertToDTO(testDriveRepository.save(testDrive));
-    }
-
     private TestDriveResponseDTO convertToDTO(TestDrive testDrive) {
         return TestDriveResponseDTO.builder()
                 .id(testDrive.getId())
-                .vehicleId(testDrive.getVehiculo().getId())
-                .interestedId(testDrive.getInteresado().getId())
-                .employeeId(testDrive.getEmpleado().getLegajo())
-                .startTime(testDrive.getFechaHoraInicio())
-                .endTime(testDrive.getFechaHoraFin())
+                .vehicleId(testDrive.getVehicleId())
+                .interestedId(testDrive.getInterestedId())
+                .employeeId(testDrive.getEmployeeId())
+                .startTime(LocalDateTime.parse(testDrive.getFechaHoraInicio(),
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .endTime(testDrive.getFechaHoraFin() != null ?
+                        LocalDateTime.parse(testDrive.getFechaHoraFin(),
+                                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null)
                 .comments(testDrive.getComentarios())
                 .build();
     }

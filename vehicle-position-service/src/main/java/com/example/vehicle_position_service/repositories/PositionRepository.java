@@ -10,11 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface PositionRepository extends JpaRepository<Position, Long> {
-    Optional<Position> findFirstByVehiculo_IdOrderByFechaHoraDesc(Long vehicleId);
-
-    List<Position> findByVehiculo_IdAndFechaHoraBetweenOrderByFechaHoraAsc(
-            Long vehicleId,
-            LocalDateTime start,
-            LocalDateTime end
-    );
+    Optional<Position> findFirstByIdVehiculoOrderByFechaHoraDesc(Long idVehiculo);
+    List<Position> findByIdVehiculoAndFechaHoraBetweenOrderByFechaHoraAsc(
+            Long idVehiculo, String startTime, String endTime);
 }

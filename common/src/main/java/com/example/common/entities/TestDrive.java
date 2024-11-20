@@ -14,24 +14,34 @@ public class TestDrive {
     @Column(name = "ID")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_VEHICULO")  // Column 2: VALUE 1
-    private Vehicle vehiculo;
+    @Column(name = "ID_VEHICULO")
+    private Long vehicleId;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_INTERESADO")  // Column 3: VALUE 1
-    private Interested interesado;
+    @Column(name = "ID_INTERESADO")
+    private Long interestedId;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_EMPLEADO")   // Column 4: VALUE 2
-    private Employee empleado;
+    @Column(name = "ID_EMPLEADO")
+    private Long employeeId;
 
-    @Column(name = "FECHA_HORA_INICIO", columnDefinition = "TEXT")  // Column 5: 2024-11-19 23:37:10
-    private LocalDateTime fechaHoraInicio;
+    @Column(name = "FECHA_HORA_INICIO")
+    private String fechaHoraInicio;
 
-    @Column(name = "FECHA_HORA_FIN", columnDefinition = "TEXT")  // Column 6: 2024-11-20 00:37:10
-    private LocalDateTime fechaHoraFin;
+    @Column(name = "FECHA_HORA_FIN")
+    private String fechaHoraFin;
 
-    @Column(name = "COMENTARIOS")  // Column 7: "Comentario"
+    @Column(name = "COMENTARIOS")
     private String comentarios;
+
+    // Add setter methods
+    public void setVehiculo(Vehicle vehicle) {
+        this.vehicleId = vehicle.getId();
+    }
+
+    public void setInteresado(Interested interested) {
+        this.interestedId = interested.getId();
+    }
+
+    public void setEmpleado(Employee employee) {
+        this.employeeId = employee.getLegajo();
+    }
 }
