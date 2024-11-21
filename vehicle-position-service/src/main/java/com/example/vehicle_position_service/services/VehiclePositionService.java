@@ -65,17 +65,18 @@ public class VehiclePositionService {
     private boolean isOutsideRadius(VehiclePositionDTO position, DealershipConfigDTO config) {
         double distance = calculateDistance(
                 position.getLatitude(), position.getLongitude(),
-                config.getDealershipLatitude(), config.getDealershipLongitude()
+                config.getCoordenadasAgencia().getLat(),
+                config.getCoordenadasAgencia().getLon()
         );
-        return distance > config.getMaxRadius();
+        return distance > config.getRadioAdmitidoKm();
     }
 
     private boolean isInDangerZone(VehiclePositionDTO position, DealershipConfigDTO config) {
-        return config.getDangerZones().stream().anyMatch(zone ->
-                position.getLatitude() <= zone.getNwLatitude() &&
-                        position.getLatitude() >= zone.getSeLatitude() &&
-                        position.getLongitude() >= zone.getNwLongitude() &&
-                        position.getLongitude() <= zone.getSeLongitude()
+        return config.getZonasRestringidas().stream().anyMatch(zone ->
+                position.getLatitude() <= zone.getNoroeste().getLat() &&
+                        position.getLatitude() >= zone.getSureste().getLat() &&
+                        position.getLongitude() >= zone.getNoroeste().getLon() &&
+                        position.getLongitude() <= zone.getSureste().getLon()
         );
     }
 
@@ -95,8 +96,7 @@ public class VehiclePositionService {
     }
 
     private void restrictCustomer(TestDrive testDrive) {
-        // Update through repository instead
-        testDriveRepository.updateInteresadoRestringido(testDrive.getInterestedId(), true);
+        testDriveRepository.updateInteresadoRestringido(testDrive.getId(), true);
     }
 
     public VehiclePositionDTO getLastPosition(Long vehicleId) {

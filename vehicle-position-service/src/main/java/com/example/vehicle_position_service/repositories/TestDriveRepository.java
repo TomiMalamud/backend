@@ -7,11 +7,12 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 @Repository
 public interface TestDriveRepository extends JpaRepository<TestDrive, Long> {
     Optional<TestDrive> findByVehicleIdAndFechaHoraFinIsNull(Long vehicleId);
 
     @Modifying
-    @Query("UPDATE TestDrive td SET td.interestedId = :restricted WHERE td.id = :id")
-    void updateInteresadoRestringido(@Param("id") Long id, @Param("restricted") boolean restricted);
+    @Query("UPDATE Interested i SET i.restringido = :restricted WHERE i.id = (SELECT td.interestedId FROM TestDrive td WHERE td.id = :testDriveId)")
+    void updateInteresadoRestringido(@Param("testDriveId") Long testDriveId, @Param("restricted") boolean restricted);
 }
