@@ -13,6 +13,9 @@ public class GWConfig {
                 .route("test-drive-service", r -> r
                         .path("/api/test-drives/**")
                         .uri("http://localhost:8081"))
+                .route("reports-service", r -> r
+                        .path("/api/reports/**")
+                        .uri("http://localhost:8081"))
                 .route("vehicle-position-service", r -> r
                         .path("/api/positions/**")
                         .uri("http://localhost:8082"))

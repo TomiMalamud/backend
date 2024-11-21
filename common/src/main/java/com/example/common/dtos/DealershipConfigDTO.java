@@ -1,5 +1,3 @@
-// Path: common/src/main/java/com/example/common/dtos/DealershipConfigDTO.java
-
 package com.example.common.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

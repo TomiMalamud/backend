@@ -87,9 +87,9 @@ public class VehiclePositionService {
     private void notifyViolation(TestDrive testDrive, String violationType, VehiclePositionDTO position) {
         String location = String.format("(%.6f, %.6f)", position.getLatitude(), position.getLongitude());
         notificationService.sendViolationAlert(
-                testDrive.getEmployeeId(),
-                testDrive.getId(),
-                violationType + " at " + location
+                testDrive.getEmployeeId(), //A quien notifica
+                testDrive.getId(),         //Ref test drive
+                violationType + " at " + location  //Mens
         );
     }
 

@@ -13,4 +13,5 @@ public class NotificationRequestDTO {
     private List<String> phoneNumbers;
     private String message;
     private String type;
+    private Long employeeId;
 }
