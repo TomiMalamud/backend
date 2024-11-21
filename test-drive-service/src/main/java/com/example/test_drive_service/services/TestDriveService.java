@@ -34,7 +34,6 @@ public class TestDriveService {
         testDrive.setEmployeeId(request.getEmployeeId());
 
         testDrive.setFechaHoraInicio(LocalDateTime.now());
-        testDrive.setFechaHoraFin(null);
 
         return convertToDTO(testDriveRepository.save(testDrive));
     }
