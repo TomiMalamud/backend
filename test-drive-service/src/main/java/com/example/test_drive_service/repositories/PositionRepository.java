@@ -8,5 +8,8 @@ import java.util.List;
 
 @Repository
 public interface PositionRepository extends JpaRepository<Position, Long> {
+
     List<Position> findByIdVehiculoAndFechaHoraBetween(Long idVehiculo, String start, String end);
+
+    List<Position> findByIdVehiculo(Long idVehiculo);
 }

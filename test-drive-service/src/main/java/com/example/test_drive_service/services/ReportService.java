@@ -2,10 +2,8 @@ package com.example.test_drive_service.services;
 
 import com.example.common.dtos.IncidentReportDTO;
 import com.example.common.dtos.TestDriveReportDTO;
-import com.example.common.entities.Position;
-import com.example.common.entities.TestDrive;
-import com.example.test_drive_service.repositories.PositionRepository;
-import com.example.test_drive_service.repositories.TestDriveRepository;
+import com.example.common.entities.*;
+import com.example.test_drive_service.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +19,9 @@ import java.util.stream.Collectors;
 public class ReportService {
     private final TestDriveRepository testDriveRepository;
     private final PositionRepository positionRepository;
+    private final EmployeeRepository employeeRepository;
+    private final InterestedRepository interestedRepository;
+    private final VehicleRepository vehicleRepository;
 
     public List<TestDriveReportDTO> getAllTestDrives() {
         return testDriveRepository.findAll().stream()
@@ -47,7 +48,7 @@ public class ReportService {
                 .map(this::convertToReportDTO)
                 .collect(Collectors.toList());
     }
-    // Add to ReportService.java
+
     public List<IncidentReportDTO> getIncidentReport() {
         return testDriveRepository.findAll().stream()
                 .filter(this::isViolation)
@@ -63,20 +64,55 @@ public class ReportService {
     }
 
     private boolean isViolation(TestDrive testDrive) {
-        // A test drive is considered a violation if it has ended and has comments
-        // (assuming comments are added when violations occur)
         return testDrive.getFechaHoraFin() != null &&
                 testDrive.getComentarios() != null &&
                 !testDrive.getComentarios().isEmpty();
     }
 
     private IncidentReportDTO convertToIncidentDTO(TestDrive testDrive) {
+        // Fetch Employee Name
+        String employeeName = null;
+        if (testDrive.getEmployeeId() != null) {
+            employeeName = employeeRepository.findById(testDrive.getEmployeeId())
+                    .map(Employee::getNombre)
+                    .orElse("Unknown Employee");
+        }
+
+        // Fetch Customer Name
+        String customerName = null;
+        if (testDrive.getInterestedId() != null) {
+            customerName = interestedRepository.findById(testDrive.getInterestedId())
+                    .map(Interested::getNombre)
+                    .orElse("Unknown Customer");
+        }
+
+        // Fetch Vehicle Plate
+        String vehiclePlate = null;
+        if (testDrive.getVehicleId() != null) {
+            vehiclePlate = vehicleRepository.findById(testDrive.getVehicleId())
+                    .map(Vehicle::getPatente)
+                    .orElse("Unknown Vehicle");
+        }
+
+        // Fetch Location (Assuming latest position)
+        String location = null;
+        List<Position> positions = positionRepository.findByIdVehiculo(testDrive.getVehicleId());
+        if (!positions.isEmpty()) {
+            Position latestPosition = positions.get(positions.size() - 1); // Or use a specific query to get the latest
+            location = "Lat: " + latestPosition.getLatitud() + ", Lon: " + latestPosition.getLongitud();
+        }
+
         return IncidentReportDTO.builder()
                 .testDriveId(testDrive.getId())
                 .violationType("RADIUS/DANGER_ZONE")
-                .violationTime(LocalDateTime.now())
+                .violationTime(testDrive.getFechaHoraFin() != null ? testDrive.getFechaHoraFin() : LocalDateTime.now())
+                .employeeName(employeeName)
+                .customerName(customerName)
+                .vehiclePlate(vehiclePlate)
+                .location(location)
                 .build();
     }
+
 
     private TestDriveReportDTO convertToReportDTO(TestDrive testDrive) {
         return TestDriveReportDTO.builder()
