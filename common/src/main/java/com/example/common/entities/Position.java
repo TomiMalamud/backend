@@ -3,7 +3,6 @@ package com.example.common.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
 
 // Position.java
 @Entity

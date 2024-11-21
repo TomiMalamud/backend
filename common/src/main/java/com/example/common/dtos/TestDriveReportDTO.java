@@ -1,9 +1,8 @@
 package com.example.common.dtos;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data

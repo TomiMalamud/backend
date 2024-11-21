@@ -1,11 +1,11 @@
 package com.example.vehicle_position_service.services.external;
 
 import com.example.common.dtos.DealershipConfigDTO;
-import com.example.common.dtos.DangerZoneDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
 import java.util.ArrayList;
 
 // Path: vehicle-position-service/src/main/java/com/example/vehicle_position_service/services/external/DealershipConfigService.java

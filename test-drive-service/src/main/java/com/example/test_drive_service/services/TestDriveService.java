@@ -1,17 +1,19 @@
 // TestDriveService.java
 package com.example.test_drive_service.services;
 
+import com.example.common.dtos.TestDriveEndRequestDTO;
 import com.example.common.dtos.TestDriveRequestDTO;
 import com.example.common.dtos.TestDriveResponseDTO;
-import com.example.common.dtos.TestDriveEndRequestDTO;
-import com.example.common.entities.*;
+import com.example.common.entities.Interested;
+import com.example.common.entities.TestDrive;
 import com.example.test_drive_service.exceptions.BusinessException;
 import com.example.test_drive_service.exceptions.ResourceNotFoundException;
-import com.example.test_drive_service.repositories.TestDriveRepository;
 import com.example.test_drive_service.repositories.InterestedRepository;
+import com.example.test_drive_service.repositories.TestDriveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

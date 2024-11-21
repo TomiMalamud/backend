@@ -1,11 +1,12 @@
 package com.example.vehicle_position_service.application.controllers;
 
 import com.example.common.dtos.VehiclePositionDTO;
-import com.example.vehicle_position_service.services.VehiclePositionService;
 import com.example.vehicle_position_service.application.ResponseHandler;
+import com.example.vehicle_position_service.services.VehiclePositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;

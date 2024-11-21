@@ -3,7 +3,6 @@ package com.example.vehicle_position_service.services;
 import com.example.common.dtos.DealershipConfigDTO;
 import com.example.common.dtos.VehiclePositionDTO;
 import com.example.common.entities.Position;
-import com.example.common.entities.Vehicle;
 import com.example.common.entities.TestDrive;
 import com.example.vehicle_position_service.repositories.PositionRepository;
 import com.example.vehicle_position_service.repositories.TestDriveRepository;
@@ -12,8 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.format.DateTimeFormatter;
+
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 

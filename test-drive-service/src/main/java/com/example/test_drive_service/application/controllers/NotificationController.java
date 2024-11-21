@@ -2,8 +2,8 @@ package com.example.test_drive_service.application.controllers;
 
 import com.example.common.dtos.NotificationRequestDTO;
 import com.example.common.dtos.NotificationResponseDTO;
-import com.example.test_drive_service.services.NotificationService;
 import com.example.test_drive_service.application.ResponseHandler;
+import com.example.test_drive_service.services.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

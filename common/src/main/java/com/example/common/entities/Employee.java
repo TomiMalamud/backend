@@ -1,7 +1,10 @@
 // common/src/main/java/com/example/common/entities/Employee.java
 package com.example.common.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
