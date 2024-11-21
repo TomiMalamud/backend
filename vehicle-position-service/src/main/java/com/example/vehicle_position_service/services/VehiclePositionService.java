@@ -33,9 +33,7 @@ public class VehiclePositionService {
         Optional<TestDrive> activeTestDrive = testDriveRepository
                 .findByVehicleIdAndFechaHoraFinIsNull(positionDTO.getVehicleId());
 
-        if (activeTestDrive.isPresent()) {
-            checkPositionConstraints(positionDTO, activeTestDrive.get());
-        }
+        activeTestDrive.ifPresent(testDrive -> checkPositionConstraints(positionDTO, testDrive));
     }
 
 

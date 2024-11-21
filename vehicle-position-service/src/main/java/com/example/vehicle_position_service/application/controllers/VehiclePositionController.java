@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-// Path: vehicle-position-service/src/main/java/com/example/vehicle_position_service/application/controllers/VehiclePositionController.java
 
 @RestController
 @RequestMapping("/api/positions")
