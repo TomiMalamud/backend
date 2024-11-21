@@ -11,16 +11,7 @@ import java.time.LocalDateTime;
 @Data
 public class TestDrive {
     @Id
-    @GeneratedValue(generator = "test_drive_sequence")
-    @TableGenerator(
-            name = "test_drive_sequence",
-            table = "sqlite_sequence",
-            pkColumnName = "name",
-            valueColumnName = "seq",
-            pkColumnValue = "PRUEBAS",
-            allocationSize = 1
-    )
-    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "ID_VEHICULO")
